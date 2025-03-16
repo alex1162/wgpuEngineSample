@@ -1,6 +1,8 @@
 #include "sample_engine.h"
 
 #include "framework/nodes/environment_3d.h"
+#include "framework/parsers/parse_gltf.h"
+#include "framework/parsers/parse_scene.h"
 
 #include "graphics/sample_renderer.h"
 #include "graphics/renderer_storage.h"
@@ -8,6 +10,8 @@
 #include "engine/scene.h"
 
 #include "shaders/mesh_grid.wgsl.gen.h"
+
+#include <spdlog/spdlog.h> //for manual debugging
 
 int SampleEngine::initialize(Renderer* renderer, sEngineConfiguration configuration)
 {
@@ -47,6 +51,20 @@ int SampleEngine::post_initialize()
         grid->set_surface_material_override(grid->get_surface(0), grid_material);
 
         main_scene->add_node(grid);
+    }
+    
+    // Create nodes
+    {
+        std::vector<Node*> parsed_entities;
+        GltfParser parser;
+    
+        //parser.parse("data/meshes/Woman.gltf", parsed_entities);
+        parser.parse("data/meshes/stanford_dragon_pbr/scene.gltf", parsed_entities);
+
+        main_scene->add_node(static_cast<MeshInstance3D*>(parsed_entities[0]));
+        //main_scene->add_node(static_cast<MeshInstance3D*>(parsed_entities[1]));
+
+
     }
 
     return 0u;
