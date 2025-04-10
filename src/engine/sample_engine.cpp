@@ -117,8 +117,8 @@ void SampleEngine::update(float delta_time)
         glm::vec3 start_eye = glm::vec3(-5.87f, 2.11f, 2.66f);
         glm::vec3 start_center = glm::vec3(-4.88f, 1.97f, 2.68f);
 
-        camera->set_eye(start_eye);
-        camera->look_at(start_eye, start_center, glm::vec3(0.0f, 1.0f, 0.0f), false);
+        /*camera->set_eye(start_eye);
+        camera->look_at(start_eye, start_center, glm::vec3(0.0f, 1.0f, 0.0f), false);*/
 
 
         // end position
