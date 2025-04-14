@@ -10,10 +10,10 @@
 #include "engine/scene.h"
 
 #include "shaders/mesh_grid.wgsl.gen.h"
+#include "shaders/mesh_grid_deferred.wgsl.gen.h"
 
 #include <spdlog/spdlog.h> //for manual debugging
 #include <framework/nodes/camera.h> // for camera movement
-#include "framework/camera/free_camera.h"
 #include "framework/input.h"
 #include <filesystem>  // Required for creating directories
 
@@ -82,7 +82,7 @@ int SampleEngine::post_initialize()
         grid_material->set_cull_type(CULL_NONE);
         grid_material->set_type(MATERIAL_UNLIT);
         grid_material->set_if_is_deferred(true);
-        grid_material->set_shader(RendererStorage::get_shader_from_source(shaders::mesh_grid::source, shaders::mesh_grid::path, shaders::mesh_grid::libraries, grid_material));
+        grid_material->set_shader(RendererStorage::get_shader_from_source(shaders::mesh_grid_deferred::source, shaders::mesh_grid_deferred::path, shaders::mesh_grid_deferred::libraries, grid_material));
         grid->set_surface_material_override(grid->get_surface(0), grid_material);
 
         main_scene->add_node(grid);
@@ -153,6 +153,9 @@ void SampleEngine::update(float delta_time)
             camera->set_eye(new_eye);
             camera->look_at(new_eye, new_center, glm::vec3(0.0f, 1.0f, 0.0f), true);
 
+            renderer->set_store_gbuffers("results/GBuffer_test_");
+            frame_counter++;
+
         }
     }
 
@@ -171,6 +174,7 @@ void SampleEngine::render()
     Renderer* renderer = Engine::get_renderer();
     if (!renderer) return;
 
+    /*
     Camera* camera = dynamic_cast<Camera*>(renderer->get_camera());
     if (camera) {
         //glm::vec3 pos = camera->get_eye();
@@ -220,7 +224,7 @@ void SampleEngine::render()
             seq = 0; // No active sequence
             spdlog::info("Sequence finished.");
         }
-    }
+    }*/
 
     Engine::render();
 }
