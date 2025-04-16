@@ -153,8 +153,12 @@ void SampleEngine::update(float delta_time)
             camera->set_eye(new_eye);
             camera->look_at(new_eye, new_center, glm::vec3(0.0f, 1.0f, 0.0f), true);
 
-            renderer->set_store_gbuffers("results/GBuffer_test_");
+            renderer->set_store_gbuffers(("results/GBuffer_test_" + std::to_string(frame_counter)).c_str());
+
+            spdlog::info("Frame " + std::to_string(frame_counter) + " stored");
+
             frame_counter++;
+
 
         }
     }
