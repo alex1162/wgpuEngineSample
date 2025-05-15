@@ -16,11 +16,25 @@
 #include <framework/nodes/camera.h> // for camera movement
 #include "framework/input.h"
 #include <filesystem>  // Required for creating directories
+#include <fstream>  // for std::ofstream
 
+float halton(int index, int base) {
+    float f = 1.0f;
+    float r = 0.0f;
+    while (index > 0) {
+        f /= static_cast<float>(base);
+        r += f * (index % base);
+        index /= base;
+    }
+    return r;
+}
 
 int SampleEngine::initialize(Renderer* renderer, sEngineConfiguration configuration)
 {
     int error = Engine::initialize(renderer, configuration);
+
+    screen_width = configuration.window_width;
+    screen_height = configuration.window_height;
 
     if (error) return error;
 
@@ -133,6 +147,7 @@ void SampleEngine::update(float delta_time)
             frame_counter = 1;
             seq = 1;  // Running seq native res
             spdlog::info("First animation started.");
+
         }
 
         // Start sequence MSAA (press M)
@@ -140,6 +155,7 @@ void SampleEngine::update(float delta_time)
             frame_counter = 1;
             seq = 2;  // Running seq MSAA
             spdlog::info("Second animation started.");
+
         }
 
         // Animate camera over multiple frames
@@ -153,13 +169,33 @@ void SampleEngine::update(float delta_time)
             camera->set_eye(new_eye);
             camera->look_at(new_eye, new_center, glm::vec3(0.0f, 1.0f, 0.0f), true);
 
-            renderer->set_store_gbuffers(("results/GBuffer_test_" + std::to_string(frame_counter)).c_str());
+            static std::vector<std::string> output_names;
+            output_names.push_back("results_txt/frame" + std::to_string(frame_counter) + "_GBuffer_");
+            renderer->set_store_gbuffers(output_names.back().c_str());
 
             spdlog::info("Frame " + std::to_string(frame_counter) + " stored");
+     
+            // generate Halton jitter 
+            float jitter_x = (halton(frame_counter, 2) - 0.5f);
+            float jitter_y = (halton(frame_counter, 3) - 0.5f);
+
+            // save jitter values to a file
+            std::ofstream jitter_file("results_txt/frame" + std::to_string(frame_counter) + "_jitter.txt");
+            jitter_file << jitter_x << " " << jitter_y << "\n";
+            jitter_file.close();
+
+            // scale jitter to screen resolution: Normalized Device Coordinates (-1, 1)
+            float jitter_scale_x = 2.0f / static_cast<float>(screen_width);
+            float jitter_scale_y = 2.0f / static_cast<float>(screen_height);
+
+            // apply jitter to camera projection
+            glm::mat4 proj = camera->get_projection();
+            proj[2][0] += jitter_x * jitter_scale_x;
+            proj[2][1] += jitter_y * jitter_scale_y;
+
+            camera->set_jittered_projection(proj);
 
             frame_counter++;
-
-
         }
     }
 

@@ -5,6 +5,10 @@
 class SampleEngine : public Engine {
 
 public:
+
+    int screen_width;
+    int screen_height;
+
     int frame_counter = 0;
     int total_frames;
     int seq = 0;
